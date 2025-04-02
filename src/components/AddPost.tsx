@@ -1,31 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState,useRef } from 'react';
 import {
   Image,
-  Gift,
-  Sparkles,
-  ListFilter,
-  Smile,
-  Calendar,
-  MapPin,
+  Video,
+  FileCode,
+  FileText,
   Bold,
   Italic,
+  Trash2,
+  X
 } from 'lucide-react';
-
+type UploadedFile = {
+  file: File;
+  previewUrl: string | null;
+};
 function AddPost() {
-  const [postText, setPostText] = useState('');
 
+  const [postText, setPostText] = useState<string>('');
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [isBold, setIsBold] = useState<boolean>(false);
+  const [isItalic, setIsItalic] = useState<boolean>(false);
+
+  // Refs for different file inputs
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
+  const codeInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Handle file selection
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
+        file,
+        previewUrl: file.type.startsWith('image') || file.type.startsWith('video') ? URL.createObjectURL(file) : null,
+      }));
+
+      setUploadedFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    }
+  };
+
+  // Remove file from upload list
+  const removeFile = (index: number): void => {
+    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  // Handle post submission
+  const handlePostSubmit = (): void => {
+    const postData = {
+      text: postText,
+      files: uploadedFiles.map((file) => file.file),
+      isBold,
+      isItalic,
+    };
+
+    console.log('Post Submitted:', postData);
+    // Send postData to backend
+
+    // Reset fields
+    setPostText('');
+    setUploadedFiles([]);
+    setIsBold(false);
+    setIsItalic(false);
+  };
   return (
     <div className="w-full rounded-xl mb-3 dark:bg-gray-800 bg-white text-white flex items-start justify-center p-4">
-      <div className="w-full max-w-xl h-[150px] dark:bg-gray-800 bg-white">
+      <div className="w-full max-w-xl min-h-[150px] dark:bg-gray-800 bg-white">
         {/* Header */}
     
         {/* Text Input */}
         <div className="min-h-[50px]">
-          <textarea
+        <textarea
             placeholder="What's happening?"
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
-            className="w-full bg-transparent text-xl outline-none resize-none text-black dark:text-white placeholder-gray-600"
+            className={`w-full bg-transparent text-xl outline-none resize-none ${
+              isBold ? 'font-bold' : ''
+            } ${isItalic ? 'italic' : ''} text-black dark:text-white placeholder-gray-600`}
             rows={2}
           />
         </div>
@@ -37,48 +87,117 @@ function AddPost() {
           </button>
         </div>
 
+
+        <div className="mt-3 mb-3 grid grid-cols-3 gap-2 flex-wrap max-h-[400px] ">
+          {uploadedFiles.map((fileData, index) => (
+            <div key={index} className="relative w-fit">
+              {fileData.previewUrl ? (
+                fileData.file.type.startsWith('image') ? (
+                  <img src={fileData.previewUrl} alt="Preview" className="w-16 h-16 object-cover rounded-lg" />
+                ) : (
+                  <video src={fileData.previewUrl} controls className="w-16 h-16 object-cover rounded-lg" />
+                )
+              ) : (
+                <div className="w-full h-24 flex items-center justify-center bg-gray-300 text-black rounded-lg">
+                  {fileData.file.type.includes('code') ? (
+                    <FileCode className="w-8 h-8" />
+                  ) : (
+                    <FileText className="w-8 h-8" />
+                  )}
+                </div>
+              )}
+              <button
+                className="absolute top-[-0.5rem] right-[-0.5rem] bg-slate-400 p-1 rounded-full"
+                onClick={() => removeFile(index)}
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+          ))}
+        </div>
+
         {/* Action Bar */}
         <div className="border-t border-[#2F3336] pt-3 flex items-center justify-between">
           <div className="flex items-center gap-2 text-black dark:text-purple-600">
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
+            {/* Image Upload */}
+            <button className="p-2 hover:bg-purple-600/10 rounded-full" onClick={() => imageInputRef.current?.click()}>
               <Image className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
-              <Gift className="w-5 h-5" />
+            <input
+              type="file"
+              accept="image/*"
+              ref={imageInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+
+            {/* Video Upload */}
+            <button className="p-2 hover:bg-purple-600/10 rounded-full" onClick={() => videoInputRef.current?.click()}>
+              <Video className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
-              <ListFilter className="w-5 h-5" />
+            <input
+              type="file"
+              accept="video/*"
+              ref={videoInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+
+            {/* Code Upload */}
+            <button className="p-2 hover:bg-purple-600/10 rounded-full" onClick={() => codeInputRef.current?.click()}>
+              <FileCode className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-[#1D9BF0]/10 rounded-full">
-              <Smile className="w-5 h-5" />
+            <input
+              type="file"
+              accept=".js,.html,.css,.json,.tsx,.jsx,.java,.py,.cpp,.cs"
+              ref={codeInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+
+            {/* Other File Upload */}
+            <button className="p-2 hover:bg-purple-600/10 rounded-full" onClick={() => fileInputRef.current?.click()}>
+              <FileText className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
-              <Calendar className="w-5 h-5" />
-            </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
-              <MapPin className="w-5 h-5" />
-            </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
+            <input
+              type="file"
+              accept=".txt,.pdf,.doc,.docx,.zip,.rar"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+
+            {/* Text Formatting */}
+            <button
+              className={`p-2 rounded-full ${isBold ? 'bg-purple-600/20' : 'hover:bg-purple-600/10'}`}
+              onClick={() => setIsBold(!isBold)}
+            >
               <Bold className="w-5 h-5" />
             </button>
-            <button className="p-2 hover:bg-purple-600/10 rounded-full">
+            <button
+              className={`p-2 rounded-full ${isItalic ? 'bg-purple-600/20' : 'hover:bg-purple-600/10'}`}
+              onClick={() => setIsItalic(!isItalic)}
+            >
               <Italic className="w-5 h-5" />
             </button>
+          </div>
+         
             <div className="flex-grow">
             <button className="px-4 py-1 rounded-full border border-[#2F3336] text-black dark:text-purple-600 text-sm font-semibold dark:border-purple-800 hover:bg-[#1D9BF0]/10 transition-colors">
               Everyone ▼
             </button>
-          </div>
-          </div>
-          <button
+            </div>
+            <button
             className="bg-purple-600 text-black dark:text-white px-4 py-1.5 rounded-full font-bold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!postText.trim()}
+            onClick={handlePostSubmit}
+            disabled={!postText.trim() && uploadedFiles.length === 0}
           >
             Post
           </button>
+          </div>
+          </div>
+          
         </div>
-      </div>
-    </div>
   );
 }
 
