@@ -9,15 +9,21 @@ import Music from '../components/Music';
 import HomeModal from "../components/HomeModal";
 import axios from 'axios';
 import { useUser } from '../context/user';
+import { use } from 'framer-motion/m';
 
 function HomePage() {
   const { user } = useUser();
-  console.log("User data:", user);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(user === null);
   const [posts, setPosts] = useState([]);
 
+  console.log(user)
   const [loading, setLoading] = useState(true);
 
+
+  useEffect(() => {
+    setIsModalOpen(user === null);
+  }, [user]);
+  
   useEffect(() => {
     axios.get('http://localhost:5000/api/posts/fetch_posts') // Replace with your actual backend URL
       .then((res) => {

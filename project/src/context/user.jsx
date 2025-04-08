@@ -24,6 +24,28 @@ export const UserProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/verify", {
+          method: "GET",
+          credentials: "include",
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          login(data.user);
+          console.log("Token is valid ✅");
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+      }
+    };
+  
+    checkAuth();
+  }, []);
+  
+
   // Update localStorage whenever user changes
   useEffect(() => {
     if (user && token) {
