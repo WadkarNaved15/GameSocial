@@ -3,10 +3,12 @@ import { Mail, Lock, ArrowRight, Zap, User, Eye, EyeOff } from 'lucide-react';
 import { GoogleOAuthProvider} from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import {useUser} from "../context/user.jsx";
 
 type AuthMode = 'login' | 'signup';
 
 function Auth() {
+  const {login} = useUser();
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,6 +36,8 @@ function Auth() {
         });
 
         if (response.ok) {
+          const data = await response.json();
+          login(data.user);
           console.log("Token is valid ✅");
           navigate("/"); // Redirect to dashboard if authenticated
         }
@@ -59,8 +63,11 @@ function Auth() {
           emailOrUsername: formData.email,
           password: formData.password
         });
+        console.log(response.data);
         if (response.status === 200) {
+          await login(response.data.user);
           console.log(response.data);
+          navigate("/")
         }
       }else{
         const response = await axios.post('http://localhost:5000/api/auth/register', {
@@ -69,7 +76,9 @@ function Auth() {
           password: formData.password
         });
         if (response.status === 200) {
+          await login(response.data.user);
           console.log(response.data);
+          navigate("/")
         }
       }
       // Here you would typically send the formData to your backend API
@@ -78,8 +87,6 @@ function Auth() {
       // Reset form data or perform other actions after successful submission
       setFormData({ username: '', email: '', password: '', confirmPassword: '' });
 
-      // Example success message
-      alert(mode === 'login' ? "Login successful!" : "Signup successful!");
 
     } catch (error) {
       console.error("Submission error:", error);

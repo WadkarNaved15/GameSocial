@@ -44,7 +44,7 @@ router.post("/register", async (req, res) => {
     await newUser.save();
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "30d" }); 
     res.cookie("token", token, { httpOnly: true, secure: false, maxAge: 30 * 24 * 60 * 60 * 1000 }); // Set cookie for 30 days
-    res.status(201).json({ message: "User registered & authenticated successfully"});
+    res.status(201).json({ message: "User registered & authenticated successfully", user: newUser, token });
   } catch (error) {
     console.error("Error in registration:", error);
     res.status(500).json({ error: "Registration failed" });
@@ -78,7 +78,7 @@ router.post("/login", async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    res.json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful", token, user });
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
   }
@@ -86,7 +86,7 @@ router.post("/login", async (req, res) => {
 
 // Verify Token Route
 router.get("/verify", verifyToken, (req, res) => {
-  res.status(200).json({ message: "Token is valid" });
+  res.status(200).json({ message: "Token is valid" ,user: req.user});
 });
 
 // Logout Route

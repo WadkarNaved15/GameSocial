@@ -10,6 +10,7 @@ import Auth from './Pages/Auth';
 // import Navbar from './components/Navbar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+
 function App() {
   return (
     <GoogleOAuthProvider clientId="970893892840-8ecshtmle4kip6ps0bl7vbkg3nogl5od.apps.googleusercontent.com">

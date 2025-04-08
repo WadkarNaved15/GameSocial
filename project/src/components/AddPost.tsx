@@ -84,8 +84,6 @@ useEffect(() => {
       }
   
       console.log("Post created:", data);
-      alert("Post submitted successfully!");
-  
       // Reset fields
       setPostText('');
       setUploadedFiles([]);
@@ -184,7 +182,7 @@ useEffect(() => {
             </button>
             <input
               type="file"
-              accept=".js,.html,.css,.json,.tsx,.jsx,.java,.py,.cpp,.cs"
+              accept=".js,.html,.css,.json,.tsx,.jsx,.java,.py,.cpp,.cs,.zip"
               ref={codeInputRef}
               style={{ display: 'none' }}
               onChange={handleFileUpload}

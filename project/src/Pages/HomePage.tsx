@@ -8,8 +8,11 @@ import AddPost from '../components/AddPost';
 import Music from '../components/Music';
 import HomeModal from "../components/HomeModal";
 import axios from 'axios';
+import { useUser } from '../context/user';
 
 function HomePage() {
+  const { user } = useUser();
+  console.log("User data:", user);
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [posts, setPosts] = useState([]);
 
@@ -18,7 +21,7 @@ function HomePage() {
   useEffect(() => {
     axios.get('http://localhost:5000/api/posts/fetch_posts') // Replace with your actual backend URL
       .then((res) => {
-        setPosts(res.data); // No need for res.json() here
+        setPosts(res.data);
         console.log("Fetched posts with user data:", res.data);
         setLoading(false);
       })
@@ -40,7 +43,7 @@ function HomePage() {
               <Profile />
           </div>
           <div className="lg:col-span-5 flex flex-col items-center justify-center min-h-[80vh]">
-            <AddPost></AddPost>
+           { user &&<AddPost></AddPost>}
             {posts.map((post, index) => (
               <Post key={index} {...post} />
             ))}
