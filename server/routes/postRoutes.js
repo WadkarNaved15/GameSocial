@@ -50,6 +50,7 @@ router.post("/create_posts", authMiddleware, upload.array("media", 5), async (re
     const newPost = new Post({
       user: userId,
       description,
+      type: "normal_post",
       media: mediaUrls,
     });
 
