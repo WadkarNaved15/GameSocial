@@ -9,6 +9,7 @@ import Auth from './Pages/Auth';
 // import GamePage from './Pages/GamePage';
 // import Navbar from './components/Navbar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { EditProfilePage } from './Pages/EditProfile';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         {/* <Route path="/upload" element={<UploadPage />} />
         <Route path="/explore" element={<ExplorePage />} /> */}
         <Route path="/profile" element={<Profile />} />
+        <Route path="/editprofile" element={<EditProfilePage />} />
         {/* <Route path="/game/:gameId" element={<GamePage />} /> */}
       </Routes>
     </Router>

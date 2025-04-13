@@ -22,9 +22,18 @@ export const ProfileHeader = () => {
             <h1 className="text-2xl font-bold text-gray-900">Sarah Johnson</h1>
             <p className="text-lg text-gray-600">Independent Game Developer</p>
           </div>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-            Follow
-          </button>
+          <div className="mt-4 h-10 flex justify-between sm:mt-0">
+                <button 
+                  onClick={() => window.location.href = '/editprofile'}
+                  className="text-base px-2 py-2 mr-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button className="text-base px-2 py-2 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                  Follow
+                </button>
+              </div>
+          
         </div>
         <p className="mt-4 text-base font-basic text-gray-600 max-w-2xl">
           Creating indie games with a focus on narrative-driven experiences. 

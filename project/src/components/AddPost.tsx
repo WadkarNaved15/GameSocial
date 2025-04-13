@@ -24,24 +24,8 @@ function AddPost() {
   const videoInputRef = useRef<HTMLInputElement | null>(null);
   const codeInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-//Posts Retrieval
-useEffect(() => {
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/posts/fetch_posts", {
-        method: "GET",
-        credentials: "include",
-      });
 
-      const data = await response.json();
-      console.log("Fetched posts with user data:", data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
-  };
 
-  fetchPosts();
-}, []);
   // Handle file selection
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const files = event.target.files;
@@ -61,39 +45,75 @@ useEffect(() => {
   };
 
   // Handle post submission
-  const handlePostSubmit = async (): Promise<void> => {
+const handlePostSubmit = async (): Promise<void> => {
+  if (uploadedFiles.length === 1 && uploadedFiles[0].file.name.endsWith(".zip")) {
+    // Handle game upload
+    const formData = new FormData();
+    formData.append('gamezip', uploadedFiles[0].file);
+    formData.append('description', postText);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Game Upload Error:", data.error);
+        return;
+      }
+
+      console.log("Game uploaded:", data);
+
+      // Reset
+      setPostText('');
+      setUploadedFiles([]);
+      setIsBold(false);
+      setIsItalic(false);
+
+    } catch (error) {
+      console.error("Game submission error:", error);
+    }
+  } else {
+    // Handle regular post
     const formData = new FormData();
     formData.append("description", postText);
-  
+
     uploadedFiles.forEach((fileData) => {
       formData.append("media", fileData.file);
     });
-  
+
     try {
       const res = await fetch("http://localhost:5000/api/posts/create_posts", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-  
+
       const data = await res.json();
-  
+
       if (!res.ok) {
-        console.error("Error:", data.error);
+        console.error("Post Error:", data.error);
         return;
       }
-  
+
       console.log("Post created:", data);
-      // Reset fields
+
+      // Reset
       setPostText('');
       setUploadedFiles([]);
       setIsBold(false);
       setIsItalic(false);
-  
+
     } catch (error) {
-      console.error("Submission error:", error);
+      console.error("Post submission error:", error);
     }
-  };
+  }
+};
+
   
   return (
     <div className="w-full rounded-xl mb-3 dark:bg-gray-800 bg-white text-white flex items-start justify-center p-4">

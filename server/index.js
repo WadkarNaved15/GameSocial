@@ -8,6 +8,7 @@ import passport from "passport";
 import "./passportConfig.js"; // Import Passport Config
 import authRoutes from "./routes/auth.js"; // Ensure the file extension is correct
 import postRoutes from "./routes/postRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -36,6 +37,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+
+// Serve uploaded games statically
+app.use("/uploads", express.static("uploads"));
+
+// Upload route
+app.use("/api/upload", uploadRoutes);
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI) // Removed the "!" here
