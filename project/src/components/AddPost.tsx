@@ -4,6 +4,7 @@ import {
   Video,
   FileCode,
   FileText,
+  FolderArchive,
   Bold,
   Italic,
   X
@@ -219,7 +220,16 @@ const handlePostSubmit = async (): Promise<void> => {
               style={{ display: 'none' }}
               onChange={handleFileUpload}
             />
-
+            <button className="p-2 hover:bg-purple-600/10 rounded-full" onClick={() => fileInputRef.current?.click()}> 
+                <FolderArchive className="w-5 h-5" />
+            </button>
+            <input
+              type="file"
+              accept=".zip,.rar"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
             {/* Text Formatting */}
             <button
               className={`p-2 rounded-full ${isBold ? 'bg-purple-600/20' : 'hover:bg-purple-600/10'}`}

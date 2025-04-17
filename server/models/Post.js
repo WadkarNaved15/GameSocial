@@ -5,7 +5,7 @@ const PostSchema = new mongoose.Schema({
   description: { type: String, required: true },
   type: {
     type: String,
-    enum: ["normal_post", "game_post"],
+    enum: ["normal_post", "game_post","exe_post"],
     required: true,
     default: "normal_post"
   },

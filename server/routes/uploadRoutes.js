@@ -20,8 +20,23 @@ const storage = multer.diskStorage({
   destination: tempDir,
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
-
 const upload = multer({ storage });
+
+// Helper: Recursively find a file by extension
+function findFileByExtension(dir, ext) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      const result = findFileByExtension(fullPath, ext);
+      if (result) return result;
+    } else if (file.toLowerCase().endsWith(ext)) {
+      return fullPath;
+    }
+  }
+  return null;
+}
 
 router.post("/", verifyToken, upload.single("gamezip"), async (req, res) => {
   const file = req.file;
@@ -36,29 +51,46 @@ router.post("/", verifyToken, upload.single("gamezip"), async (req, res) => {
   fs.mkdirSync(extractPath);
 
   fs.createReadStream(file.path)
-    .pipe(unzipper.Extract({ path: extractPath }))
-    .on("close", async () => {
-      fs.unlinkSync(file.path); // delete temp zip
+  .pipe(unzipper.Extract({ path: extractPath }))
+  .on("finish", async () => {
+    setTimeout(() => {
+      fs.unlink(file.path, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error(`User ID: ${userId}`);
+          console.error("Failed to delete temp zip:", unlinkErr);
+        } else {
+          console.log("Temp zip deleted successfully.");
+        }
+      });
+    }, 1000); // Delay 1 second
 
       try {
-        const extractedItems = fs.readdirSync(extractPath);
-        const subfolder = extractedItems.find(name => {
-          const fullPath = path.join(extractPath, name);
-          return fs.statSync(fullPath).isDirectory();
-        });
+        // Find index.html or .exe
+        const indexHtmlPath = findFileByExtension(extractPath, "index.html");
+        const exePath = findFileByExtension(extractPath, ".exe");
 
-        if (!subfolder) {
-          return res.status(500).send("No folder found inside ZIP");
+        let gameType = "";
+        let gameUrl = "";
+
+        if (indexHtmlPath) {
+          // Web game
+          gameType = "game_post";
+          const relativePath = indexHtmlPath.split("uploads")[1].replace(/\\/g, "/");
+          gameUrl = `${req.protocol}://${req.get("host")}/uploads${relativePath}`;
+        } else if (exePath) {
+          // EXE game
+          gameType = "exe_post";
+          gameUrl = exePath; // Local path, for now. You may want to restrict or hide this from client later.
+        } else {
+          return res.status(400).send("No valid game file found (.exe or index.html)");
         }
-
-        const gameUrl = `${req.protocol}://${req.get("host")}/uploads/${uniqueFolder}/${subfolder}/index.html`;
 
         const newPost = new Post({
           user: userId,
           description,
-          type: "game_post",
+          type: gameType,
           gameUrl,
-          media: [], // Optional: keep empty for game_post
+          media: [],
         });
 
         await newPost.save();
@@ -69,8 +101,8 @@ router.post("/", verifyToken, upload.single("gamezip"), async (req, res) => {
         });
 
       } catch (err) {
-        console.error("Folder detection error:", err);
-        res.status(500).send("Error while preparing game URL");
+        console.error("Game detection error:", err);
+        res.status(500).send("Error while preparing game");
       }
     })
     .on("error", (err) => {
