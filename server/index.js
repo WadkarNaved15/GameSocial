@@ -9,9 +9,14 @@ import "./passportConfig.js"; // Import Passport Config
 import authRoutes from "./routes/auth.js"; // Ensure the file extension is correct
 import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import gameRoutes from "./routes/gameRoutes.js";
+import { setupSocket } from "./sockets/gameSocket.js";
+import http from "http";
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -43,10 +48,15 @@ app.use("/uploads", express.static("uploads"));
 
 // Upload route
 app.use("/api/upload", uploadRoutes);
+app.use("/api/games", gameRoutes);
 // Connect to MongoDB
+
+setupSocket(server);
+
+
 mongoose
   .connect(process.env.MONGO_URI) // Removed the "!" here
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Bell, Moon, Search, Sun, Upload ,Home,UserRound,BriefcaseBusiness,LogOut,LogIn} from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import axios from 'axios';
-import {useUser} from "../context/user.jsx";
+import {useUser} from "../context/user.js";
 
 export function Header() {
   const { isDark, toggleTheme } = useTheme();

@@ -3,7 +3,7 @@ import { Mail, Lock, ArrowRight, Zap, User, Eye, EyeOff } from 'lucide-react';
 import { GoogleOAuthProvider} from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import {useUser} from "../context/user.jsx";
+import {useUser} from "../context/user.js";
 
 type AuthMode = 'login' | 'signup';
 
